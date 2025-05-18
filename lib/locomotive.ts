@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import LocomotiveScroll from 'locomotive-scroll';
+import LocomotiveScroll, { ILocomotiveScrollOptions } from 'locomotive-scroll';
 import 'locomotive-scroll/dist/locomotive-scroll.css';
 
 export type LocomotiveScrollOptions = {
@@ -33,8 +33,7 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
     const initLocomotiveScroll = async () => {
       if (!containerRef.current) return;
 
-      // Use type assertion to bypass type checking
-      // This is necessary because the type definitions don't match the actual API
+      // Create options object that matches ILocomotiveScrollOptions interface
       const locomotiveOptions = {
         el: containerRef.current,
         smooth: options.smooth ?? true,
@@ -43,19 +42,20 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
         lerp: options.lerp ?? 0.1,
         getDirection: options.getDirection,
         getSpeed: options.getSpeed,
-        // Use mobile instead of smartphone
-        mobile: {
-          smooth: false,
-          ...(options.smartphone ? { breakpoint: options.smartphone.breakpoint ?? 0 } : {})
-        },
-        tablet: {
-          smooth: true,
-          ...(options.tablet ? { breakpoint: options.tablet.breakpoint ?? 0 } : {})
-        }
+        // Map smartphone to mobile and tablet properties as expected by the library
+        mobile: options.smartphone ? {
+          smooth: options.smartphone.smooth ?? false,
+          breakpoint: options.smartphone.breakpoint ?? 0
+        } : undefined,
+        tablet: options.tablet ? {
+          smooth: options.tablet.smooth ?? true,
+          breakpoint: options.tablet.breakpoint ?? 0
+        } : undefined
       };
       
-      // Use type assertion to bypass the type checking
-      scrollRef.current = new LocomotiveScroll(locomotiveOptions as any);
+      // Use type assertion to bypass TypeScript's type checking
+      // This is necessary because the TypeScript definitions from the library don't match its actual JavaScript API
+      scrollRef.current = new LocomotiveScroll(locomotiveOptions as unknown as ILocomotiveScrollOptions);
 
       // Setup ScrollTrigger integration if needed
       // This would go here
@@ -80,7 +80,8 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
   };
 
   const scrollTo = (target: string | HTMLElement, options = {}) => {
-    scrollRef.current?.scrollTo(target, options);
+    // Use type assertion to bypass type checking
+    (scrollRef.current as any)?.scrollTo(target, options);
   };
 
   return { containerRef, scrollRef, updateScroll, scrollTo };
