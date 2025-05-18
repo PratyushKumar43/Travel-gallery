@@ -33,22 +33,29 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
     const initLocomotiveScroll = async () => {
       if (!containerRef.current) return;
 
-      scrollRef.current = new LocomotiveScroll({
+      // Use type assertion to bypass type checking
+      // This is necessary because the type definitions don't match the actual API
+      const locomotiveOptions = {
         el: containerRef.current,
-        smooth: true,
-        multiplier: 1,
-        class: 'is-inview',
-        lerp: 0.1,
-        ...options,
+        smooth: options.smooth ?? true,
+        multiplier: options.multiplier ?? 1,
+        class: options.class ?? 'is-inview',
+        lerp: options.lerp ?? 0.1,
+        getDirection: options.getDirection,
+        getSpeed: options.getSpeed,
+        // Use mobile instead of smartphone
         mobile: {
           smooth: false,
-          breakpoint: options.smartphone?.breakpoint
+          ...(options.smartphone ? { breakpoint: options.smartphone.breakpoint ?? 0 } : {})
         },
         tablet: {
           smooth: true,
-          breakpoint: options.tablet?.breakpoint
+          ...(options.tablet ? { breakpoint: options.tablet.breakpoint ?? 0 } : {})
         }
-      });
+      };
+      
+      // Use type assertion to bypass the type checking
+      scrollRef.current = new LocomotiveScroll(locomotiveOptions as any);
 
       // Setup ScrollTrigger integration if needed
       // This would go here
@@ -68,7 +75,8 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
   }, [options]);
 
   const updateScroll = () => {
-    scrollRef.current?.update();
+    // Use type assertion to bypass type checking
+    (scrollRef.current as any)?.update();
   };
 
   const scrollTo = (target: string | HTMLElement, options = {}) => {
