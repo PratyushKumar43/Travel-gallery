@@ -40,13 +40,13 @@ export const useLocomotiveScroll = (options: LocomotiveScrollOptions = {}) => {
         class: 'is-inview',
         lerp: 0.1,
         ...options,
-        smartphone: {
+        mobile: {
           smooth: false,
-          ...options.smartphone
+          breakpoint: options.smartphone?.breakpoint
         },
         tablet: {
           smooth: true,
-          ...options.tablet
+          breakpoint: options.tablet?.breakpoint
         }
       });
 
